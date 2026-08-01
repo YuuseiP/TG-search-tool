@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>TeleScope</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="brand"><span class="brand-mark">T</span><span>TeleScope</span></div>
+      <nav class="nav" aria-label="主导航">
+        <button class="nav-item active" data-view="search"><span>搜索档案</span></button>
+        <button class="nav-item" data-view="bookmarks"><span>我的收藏</span></button>
+        <button class="nav-item" data-view="channels"><span>频道管理</span></button>
+        <button class="nav-item" data-view="settings"><span>连接设置</span></button>
+      </nav>
+      <div class="sidebar-bottom">
+        <div class="privacy-note"><span class="status-dot"></span><span>本地索引，不上传内容</span></div>
+      </div>
+    </aside>
+    <main class="workspace">
+      <header class="topbar">
+        <div><p class="eyebrow" id="view-label">消息档案</p><h1 id="page-title">跨频道搜索</h1></div>
+        <div class="connection"><span class="status-dot muted" id="connection-dot"></span><span id="connection-text">未配置</span></div>
+      </header>
+      <section id="search-view" class="view active">
+        <div class="search-panel">
+          <div class="query-row"><input id="query" type="search" autocomplete="off" placeholder="搜索文本、标签或链接..."><button class="primary" id="search-button">搜索</button></div>
+          <div class="filters">
+            <div class="filter-group"><label>内容类型</label><div class="chips" id="media-types">
+              <button data-type="text" class="chip selected">文本</button><button data-type="image" class="chip selected">图片</button><button data-type="video" class="chip selected">视频</button><button data-type="document" class="chip selected">文件</button><button data-type="audio" class="chip selected">音频</button><button data-type="link" class="chip selected">链接</button>
+            </div></div>
+            <div class="filter-group channel-filter"><label>频道范围</label><button class="select-button" id="channel-picker">全部已索引频道 <span id="channel-count">0</span></button><div id="channel-menu" class="channel-menu hidden"></div></div>
+            <div class="filter-group compact"><label for="from-date">起始日期</label><input id="from-date" type="date"></div>
+            <div class="filter-group compact"><label for="until-date">结束日期</label><input id="until-date" type="date"></div>
+          </div>
+        </div>
+        <div class="result-toolbar"><span id="result-count">正在读取索引...</span><div><button class="text-button" id="clear-filters">清除筛选</button></div></div>
+        <div id="results" class="results" aria-live="polite"></div>
+        <button class="load-more hidden" id="load-more">加载更多</button>
+      </section>
+      <section id="bookmarks-view" class="view"><div class="section-heading"><h2>我的收藏</h2><p>保存在当前电脑的本地书签。</p></div><div id="bookmark-results" class="results"></div></section>
+      <section id="channels-view" class="view"><div class="section-heading"><h2>频道管理</h2><p>先扫描可访问的频道和群组，再选择需要建立本地索引的来源。同步只保存文字和元数据，不下载媒体文件。</p></div><div class="channel-actions"><button class="primary" id="scan-button">扫描频道</button><button class="primary" id="sync-button" disabled>获取并建立索引</button><label class="limit-field">每个频道<input type="number" id="sync-limit" min="1" max="10000" value="2000">条</label></div><p class="form-status" id="scan-status"></p><div id="dialogs" class="dialog-list"></div><section class="indexed-section" aria-labelledby="indexed-heading"><div class="section-heading compact-heading"><h3 id="indexed-heading">本地索引</h3><p>删除只清除本机保存的消息、全文索引和书签；Telegram 原消息不受影响。</p></div><div id="indexed-channels" class="dialog-list"></div></section><section class="sync-progress hidden" id="sync-progress" aria-live="polite"><div class="sync-progress-heading"><strong>同步进度</strong><span id="sync-summary"></span></div><p id="sync-current" class="message-date"></p><progress id="sync-overall" value="0" max="100">0%</progress><div id="sync-results" class="sync-results"></div></section></section>
+      <section id="settings-view" class="view"><div class="settings-grid"><div><div class="section-heading"><h2>Telegram 连接</h2><p>通过 Clash 代理使用 Telegram 官方 API 登录。会话文件仅保留在本地 data 文件夹。</p></div><form id="settings-form" class="settings-form"><label>API ID<input name="api_id" type="number" required placeholder="例如 123456"></label><label>API Hash<input name="api_hash" type="password" required placeholder="32 位字符"></label><label>手机号<input name="phone" required placeholder="+8613800000000"></label><fieldset class="proxy-settings"><legend>Clash 代理</legend><div class="proxy-grid"><label>协议<select name="proxy_type"><option value="socks5" selected>SOCKS5</option><option value="http">HTTP CONNECT</option></select></label><label>主机<input name="proxy_host" required value="127.0.0.1" autocomplete="off"></label><label>端口<input name="proxy_port" type="number" required min="1" max="65535" value="7890"></label><label>用户名（可选）<input name="proxy_username" autocomplete="username"></label><label>密码（可选）<input name="proxy_password" type="password" autocomplete="current-password"></label></div></fieldset><button class="primary" type="submit">保存并发送验证码</button></form><form id="code-form" class="settings-form hidden"><label>验证码<input name="code" inputmode="numeric" required placeholder="Telegram 发来的验证码"></label><label>两步验证密码（如有）<input name="password" type="password"></label><button class="primary" type="submit">完成登录</button></form><p class="form-status" id="auth-status"></p></div><div class="help-panel"><h3>开始索引</h3><ol><li>在 my.telegram.org 创建应用，获得 API ID 与 API Hash。</li><li>确认 Clash 已启动；默认使用 SOCKS5 127.0.0.1:7890。</li><li>填写手机号并完成验证码登录。</li><li>在频道管理中勾选频道，然后同步。</li></ol></div></div></section>
+    </main>
+  </div>
+  <dialog id="message-dialog"><div class="modal-header"><h2>消息详情</h2><button class="icon-button" id="close-dialog" aria-label="关闭">x</button></div><div id="message-detail"></div></dialog>
+  <div id="toast" class="toast hidden"></div>
+  <script src="/static/app.js"></script>
+</body>
+</html>
